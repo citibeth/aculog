@@ -39,6 +39,6 @@ Dump weather data from AcuRite Internet Bridge
         acurite  27273  0.0  0.0  15944  2272 pts/5    S+   14:45   0:00 grep --color=auto aculog
 
 1. Watch output appear
-2. 
+
         ls ~acurite/data
         tail -f ~acurite/data/acurite-20151227.text
