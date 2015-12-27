@@ -85,7 +85,7 @@ void process_line(char *line)
 		struct tm gmcal = *gmtime(&latest_t);
 		fprintf(cur_file, "ts=%s&utc=%04d%02d%02d-%02d:%02d:%02d%s&%s\n",
 			latest_ts,
-			gmcal.tm_year, gmcal.tm_mon+1, gmcal.tm_mday, gmcal.tm_hour, gmcal.tm_min, gmcal.tm_sec, smillis,
+			gmcal.tm_year+1900, gmcal.tm_mon+1, gmcal.tm_mday, gmcal.tm_hour, gmcal.tm_min, gmcal.tm_sec, smillis,
 			id);
 		fflush(cur_file);
 	}
