@@ -36,40 +36,39 @@ The solution is to log the data yourself on your PC / Rasberry Pi.
 
 1. Use tcpdump to manually check that data are coming over your new Ethernet card from the Internet Bridge.  You should see something as follows.  Note the "id=" lines, which are keyed on your Mac Address and contain your data!
 
-```
-sudo apt-get install tcpdump
-> sudo /usr/sbin/tcpdump -tttt -A -n -p -U -i eth1 -s0 tcp dst port 80
+        sudo apt-get install tcpdump
+        > sudo /usr/sbin/tcpdump -tttt -A -n -p -U -i eth1 -s0 tcp dst port 80
+        
+        tcpdump: WARNING: eth1: no IPv4 address assigned
+        tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+        listening on eth1, link-type EN10MB (Ethernet), capture size 65535 bytes
+        2015-12-27 15:03:28.901903 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [S], seq 1718479044, win 400, options [mss 536], length 0
+        E..,.U..d.........0..#.Pfm......`.............
+        2015-12-27 15:03:28.975841 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 3422502709, win 400, length 0
+        E..(.V..d.........0..#.Pfm....?5P.............
+        2015-12-27 15:03:28.979221 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 0:75, ack 1, win 400, length 75
+        E..s.W..d..Y......0..#.Pfm....?5P.......POST /messages/ HTTP/1.1
+        Content-Type: application/x-www-form-urlencoded
+        
+        2015-12-27 15:03:28.979535 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 75:115, ack 1, win 400, length 40
+        E..P.X..d..{......0..#.Pfm....?5P...uZ..Host: www.acu-link.com
+        Content-Length: 
+        2015-12-27 15:03:28.980409 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 115:140, ack 1, win 400, length 25
+        E..A.Y..d.........0..#.Pfm.8..?5P.......97
+        Connection: close
+        
+        
+        2015-12-27 15:03:29.051719 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 140:237, ack 1, win 400, length 97
+        E....Z..d..@......0..#.Pfm.Q..?5P....-..id=6BA62486EA42&sensor=01651&mt=tower&humidity=A0560&temperature=A021300000&battery=normal&rssi=3
+        2015-12-27 15:03:29.153191 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 293, win 108, length 0
+        E..(.[..d.........0..#.Pfm....@YP..l..........
+        2015-12-27 15:03:29.153726 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 294, win 108, length 0
+        E..(.\..d.........0..#.Pfm....@ZP..l..........
+        2015-12-27 15:03:29.156313 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [F.], seq 237, ack 294, win 400, length 0
+        E..(.]..d.........0..#.Pfm....@ZP.............
+        2015-12-27 15:03:29.156842 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [R.], seq 237, ack 294, win 400, length 0
+        E..(.^..
 
-tcpdump: WARNING: eth1: no IPv4 address assigned
-tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
-listening on eth1, link-type EN10MB (Ethernet), capture size 65535 bytes
-2015-12-27 15:03:28.901903 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [S], seq 1718479044, win 400, options [mss 536], length 0
-E..,.U..d.........0..#.Pfm......`.............
-2015-12-27 15:03:28.975841 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 3422502709, win 400, length 0
-E..(.V..d.........0..#.Pfm....?5P.............
-2015-12-27 15:03:28.979221 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 0:75, ack 1, win 400, length 75
-E..s.W..d..Y......0..#.Pfm....?5P.......POST /messages/ HTTP/1.1
-Content-Type: application/x-www-form-urlencoded
-
-2015-12-27 15:03:28.979535 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 75:115, ack 1, win 400, length 40
-E..P.X..d..{......0..#.Pfm....?5P...uZ..Host: www.acu-link.com
-Content-Length: 
-2015-12-27 15:03:28.980409 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 115:140, ack 1, win 400, length 25
-E..A.Y..d.........0..#.Pfm.8..?5P.......97
-Connection: close
-
-
-2015-12-27 15:03:29.051719 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [P.], seq 140:237, ack 1, win 400, length 97
-E....Z..d..@......0..#.Pfm.Q..?5P....-..id=6BA62486EA42&sensor=01651&mt=tower&humidity=A0560&temperature=A021300000&battery=normal&rssi=3
-2015-12-27 15:03:29.153191 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 293, win 108, length 0
-E..(.[..d.........0..#.Pfm....@YP..l..........
-2015-12-27 15:03:29.153726 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [.], ack 294, win 108, length 0
-E..(.\..d.........0..#.Pfm....@ZP..l..........
-2015-12-27 15:03:29.156313 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [F.], seq 237, ack 294, win 400, length 0
-E..(.]..d.........0..#.Pfm....@ZP.............
-2015-12-27 15:03:29.156842 IP 192.168.1.251.1571 > 174.143.48.162.80: Flags [R.], seq 237, ack 294, win 400, length 0
-E..(.^..
-```
 1. Install prerequisites
 
         sudo apt-get install tcpdump cmake
@@ -113,13 +112,11 @@ E..(.^..
 
  Sample output:
 
-```
-ts=2015-12-27 14:47:06.579203&utc=01151227-19:47:06.579203&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
-ts=2015-12-27 14:47:08.048149&utc=01151227-19:47:08.048149&id=24C86E064A98&sensor=13427&mt=tower&humidity=A0870&temperature=A014300000&battery=normal&rssi=1
-ts=2015-12-27 14:47:09.828367&utc=01151227-19:47:09.828367&id=24C86E064A98&mt=pressure&C1=3FDB&C2=0D70&C3=00D0&C4=01B5&C5=81C4&C6=1873&C7=09C4&A=07&B=19&C=06&D=0B&PR=A8CA&TR=8621
-ts=2015-12-27 14:47:16.480396&utc=01151227-19:47:16.480396&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
-ts=2015-12-27 14:47:22.957555&utc=01151227-19:47:22.957555&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
-ts=2015-12-27 14:47:33.361315&utc=01151227-19:47:33.361315&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
-```
+        ts=2015-12-27 14:47:06.579203&utc=01151227-19:47:06.579203&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
+        ts=2015-12-27 14:47:08.048149&utc=01151227-19:47:08.048149&id=24C86E064A98&sensor=13427&mt=tower&humidity=A0870&temperature=A014300000&battery=normal&rssi=1
+        ts=2015-12-27 14:47:09.828367&utc=01151227-19:47:09.828367&id=24C86E064A98&mt=pressure&C1=3FDB&C2=0D70&C3=00D0&C4=01B5&C5=81C4&C6=1873&C7=09C4&A=07&B=19&C=06&D=0B&PR=A8CA&TR=8621
+        ts=2015-12-27 14:47:16.480396&utc=01151227-19:47:16.480396&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
+        ts=2015-12-27 14:47:22.957555&utc=01151227-19:47:22.957555&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
+        ts=2015-12-27 14:47:33.361315&utc=01151227-19:47:33.361315&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
 
 1. Go to http://github.com/citibob/acuparse to parse and use the  data you're now receiving!
