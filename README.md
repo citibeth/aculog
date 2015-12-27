@@ -5,7 +5,7 @@ Dump weather data from AcuRite Internet Bridge
 
 The AcuRite Internet Bridge (http://www.acurite.com/aculink-internet-bridge-for-acurite-weather-sensors-09150trx.html) allows one to build an at-home sensor network / weather station.  It continuously monitors the state of the sensors, and forwards the data to AcuRite.com.  Unfortunately, the bridge comes with NO SUPPORT to get the data yourself, without first going through their servers; and the on-line user experience is terrible.
 
-The solution is to log the data yourself on your PC / Rasberry Pi. 
+The solution is to log the data yourself on your PC / Rasberry Pi. The software presented here is thanks to George Nincehelser (http://nincehelser.com/ipwx/).  It is a "robustified" version of the software presneted in that location.
 
 # Instructions
 
