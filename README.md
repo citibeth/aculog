@@ -43,7 +43,7 @@ Dump weather data from AcuRite Internet Bridge
         ls ~acurite/data
         tail -f ~acurite/data/acurite-20151227.text
 
-Sample output:
+ Sample output:
 
 ```
 ts=2015-12-27 14:47:06.579203&utc=01151227-19:47:06.579203&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
@@ -53,3 +53,5 @@ ts=2015-12-27 14:47:16.480396&utc=01151227-19:47:16.480396&id=24C86E064A98&senso
 ts=2015-12-27 14:47:22.957555&utc=01151227-19:47:22.957555&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
 ts=2015-12-27 14:47:33.361315&utc=01151227-19:47:33.361315&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
 ```
+
+1. Go to http://github.com/citibob/acuparse to parse and use the  data you're now receiving!
