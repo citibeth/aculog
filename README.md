@@ -1,5 +1,5 @@
-# acudump
-Dump weather data from AcuRite Internet Bridge
+# aculog
+Log weather data from AcuRite Internet Bridge
 
 # Introduction
 
