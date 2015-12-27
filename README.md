@@ -119,6 +119,8 @@ The solution is to log the data yourself on your PC / Rasberry Pi. The software 
         ts=2015-12-27 14:47:22.957555&utc=01151227-19:47:22.957555&id=24C86E064A98&sensor=01948&mt=tower&humidity=A0560&temperature=A021200000&battery=normal&rssi=3
         ts=2015-12-27 14:47:33.361315&utc=01151227-19:47:33.361315&id=24C86E064A98&sensor=03203&mt=tower&humidity=A0600&temperature=A019100000&battery=normal&rssi=3
 
+ Note the rssi field at the end of the line.  This is apparently an indicator of the signal strenght, with 4 being the strongest.  Use this line to help with placement of your sensors and Internet Bridge.
+
 1. Reboot, and verify that data collection continues without intervention upon start-up.
 
 1. Go to http://github.com/citibob/acuparse to parse and use the  data you're now receiving!
