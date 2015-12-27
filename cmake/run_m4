@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+
+OUT=$1
+
+shift
+m4 "$@" >$OUT
+
