@@ -10,16 +10,17 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <string.h>
+#include <time.h>
 
 // These are defined exernally by CMake
 // #define ACURITE_INTERNET_BRIDGE_ID "24C86E064A98"
 // #define TCPDUMP_EXE "/usr/sbin/tcpdump"
 // #define DATA_DIR "/export/home/acurite/data"
-// #define PID_FILE "/export/home/acurite/acudump.pid"
+// #define ACULOG_PID "/export/home/acurite/aculog.pid"
 
 char *xxargv[] = {TCPDUMP_EXE, "-tttt", "-A", "-n", "-p", "-l", "-i", "eth1", "-s0", "tcp", "dst", "port", "80"};
 char *xxenvp[] = {(char *)0};
-char latest_date[32];		// Last date we read from the network
+char latest_ts[32];		// Last date we read from the network
 FILE *cur_file = NULL;
 char cur_file_date[32];		// Date of file we're writing
 
@@ -42,8 +43,8 @@ void process_line(char *line)
 
 	// Look for date
 	if ((len >= 26) && (line[4] == '-') && (line[7] == '-') && (line[10] == ' ') && (line[13] == ':') && (line[16] == ':') && (line[19] == '.')) {
-		strncpy(latest_date, line, 26);
-		latest_date[26] = '\0';
+		strncpy(latest_ts, line, 26);
+		latest_ts[26] = '\0';
 		return;
 	}
 
@@ -52,14 +53,14 @@ void process_line(char *line)
 		// We have something to write...
 
 		// See if we need to open a new file
-		if ((cur_file == NULL) || (strncmp(cur_file_date, latest_date, 10) != 0)) {
+		if ((cur_file == NULL) || (strncmp(cur_file_date, latest_ts, 10) != 0)) {
 			if (cur_file != NULL) fclose(cur_file);
 
 			// Construct new filename
 
-			// First, squeeze out delimiters in date
+			// First, squeeze out delimiters in timestamp
 			char sdate[32];
-			strcpy(sdate, latest_date);
+			strcpy(sdate, latest_ts);
 			sdate[4] = sdate[7] = sdate[10] = sdate[13] = sdate[16] = sdate[19] = '\0';
 
 			// Open the new file
@@ -68,14 +69,24 @@ void process_line(char *line)
 			fname[sizeof(fname)-1] = '\0';
 			// fprintf(stderr, "Opening file: %s\n", fname);
 			cur_file = fopen(fname, "a");
-			strcpy(cur_file_date, latest_date);
+			strncpy(cur_file_date, latest_ts, sizeof(cur_file_date));
 
 			// Write the timezone to it
 			get_timezone(buf, sizeof(buf));
 			fprintf(cur_file, "tz=%s\n", buf);
 		}
-			
-		fprintf(cur_file, "ts=%s&%s\n", latest_date, id);
+
+		// Convert latest_ts to UTC
+		// http://stackoverflow.com/questions/1764710/converting-string-containing-localtime-into-utc-in-c
+		char *smillis = &latest_ts[19];		// .000000
+		struct tm latest_tm;
+		strptime(latest_ts, "%Y-%m-%d %H:%M:%S", &latest_tm);
+		time_t latest_t = mktime(&latest_tm);
+		struct tm gmcal = *gmtime(&latest_t);
+		fprintf(cur_file, "ts=%s&utc=%04d%02d%02d-%02d:%02d:%02d%s&%s\n",
+			latest_ts,
+			gmcal.tm_year, gmcal.tm_mon+1, gmcal.tm_mday, gmcal.tm_hour, gmcal.tm_min, gmcal.tm_sec, smillis,
+			id);
 		fflush(cur_file);
 	}
 }
@@ -98,7 +109,7 @@ int main(int argc, char **argv)
 
 	// ------- Check to see if the process is running
 	// Read out of PID file
-	FILE *f = fopen(PID_FILE, "r");
+	FILE *f = fopen(ACULOG_PID, "r");
 	if (f != NULL) {
 		long pid;
 		fscanf(f, "%ld", &pid);
@@ -152,7 +163,7 @@ int main(int argc, char **argv)
 	}
 
 	// Write our PID to a file
-	int pidf = open(PID_FILE, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	int pidf = open(ACULOG_PID, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	size_t count = snprintf(buf, sizeof(buf)-1, "%d\n", getpid());
 	buf[sizeof(buf)-1] = '\0';
 	write(pidf, buf, count);
