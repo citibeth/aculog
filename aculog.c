@@ -23,7 +23,7 @@ char *xxenvp[] = {(char *)0};
 char latest_ts[32];		// Last date we read from the network
 FILE *cur_file = NULL;
 char cur_file_date[32];		// Date of file we're writing
-
+int state = 0;    // Parser state
 
 // Works only on Debian/Ubuntu: http://stackoverflow.com/questions/3118582/how-do-i-find-the-current-system-timezone
 void get_timezone(char *buf, size_t max)
@@ -36,10 +36,51 @@ void get_timezone(char *buf, size_t max)
 	if (nl != NULL) *nl = '\0';
 }
 
-void process_line(char *line)
+void process_line0(char *tok)
 {
 	char buf[128];
+
+    // See if we need to open a new file
+	if ((cur_file == NULL) || (strncmp(cur_file_date, latest_ts, 10) != 0)) {
+		if (cur_file != NULL) fclose(cur_file);
+
+		// Construct new filename
+
+		// First, squeeze out delimiters in timestamp
+		char sdate[32];
+		strcpy(sdate, latest_ts);
+		sdate[4] = sdate[7] = sdate[10] = sdate[13] = sdate[16] = sdate[19] = '\0';
+
+		// Open the new file
+		char fname[1024];
+		snprintf(fname, sizeof(fname)-1, "%s/acurite-%s%s%s.txt", DATA_DIR, &sdate[0], &sdate[5], &sdate[8]);
+		fname[sizeof(fname)-1] = '\0';
+		// fprintf(stderr, "Opening file: %s\n", fname);
+		cur_file = fopen(fname, "a");
+		strncpy(cur_file_date, latest_ts, sizeof(cur_file_date));
+
+		// Write the timezone to it
+		get_timezone(buf, sizeof(buf));
+		fprintf(cur_file, "tz=%s\n", buf);
+	}
+
+	// Convert latest_ts to UTC
+	// http://stackoverflow.com/questions/1764710/converting-string-containing-localtime-into-utc-in-c
+	char *smillis = &latest_ts[19];		// .000000
+	struct tm latest_tm;
+	strptime(latest_ts, "%Y-%m-%d %H:%M:%S", &latest_tm);
+	time_t latest_t = mktime(&latest_tm);
+	struct tm gmcal = *gmtime(&latest_t);
+    fprintf(cur_file, "\nts=%s&utc=%04d%02d%02d-%02d:%02d:%02d%s&%s",
+		latest_ts,
+		gmcal.tm_year+1900, gmcal.tm_mon+1, gmcal.tm_mday, gmcal.tm_hour, gmcal.tm_min, gmcal.tm_sec, smillis,
+		tok);
+}
+
+void process_line(char *line)
+{
 	size_t len = strlen(line);
+    char *tok;
 
 	// Look for date
 	if ((len >= 26) && (line[4] == '-') && (line[7] == '-') && (line[10] == ' ') && (line[13] == ':') && (line[16] == ':') && (line[19] == '.')) {
@@ -48,47 +89,21 @@ void process_line(char *line)
 		return;
 	}
 
-	char *id=strstr(line, "id=" ACURITE_INTERNET_BRIDGE_ID);
-	if (id != NULL) {
-		// We have something to write...
-
-		// See if we need to open a new file
-		if ((cur_file == NULL) || (strncmp(cur_file_date, latest_ts, 10) != 0)) {
-			if (cur_file != NULL) fclose(cur_file);
-
-			// Construct new filename
-
-			// First, squeeze out delimiters in timestamp
-			char sdate[32];
-			strcpy(sdate, latest_ts);
-			sdate[4] = sdate[7] = sdate[10] = sdate[13] = sdate[16] = sdate[19] = '\0';
-
-			// Open the new file
-			char fname[1024];
-			snprintf(fname, sizeof(fname)-1, "%s/acurite-%s%s%s.txt", DATA_DIR, &sdate[0], &sdate[5], &sdate[8]);
-			fname[sizeof(fname)-1] = '\0';
-			// fprintf(stderr, "Opening file: %s\n", fname);
-			cur_file = fopen(fname, "a");
-			strncpy(cur_file_date, latest_ts, sizeof(cur_file_date));
-
-			// Write the timezone to it
-			get_timezone(buf, sizeof(buf));
-			fprintf(cur_file, "tz=%s\n", buf);
-		}
-
-		// Convert latest_ts to UTC
-		// http://stackoverflow.com/questions/1764710/converting-string-containing-localtime-into-utc-in-c
-		char *smillis = &latest_ts[19];		// .000000
-		struct tm latest_tm;
-		strptime(latest_ts, "%Y-%m-%d %H:%M:%S", &latest_tm);
-		time_t latest_t = mktime(&latest_tm);
-		struct tm gmcal = *gmtime(&latest_t);
-		fprintf(cur_file, "ts=%s&utc=%04d%02d%02d-%02d:%02d:%02d%s&%s\n",
-			latest_ts,
-			gmcal.tm_year+1900, gmcal.tm_mon+1, gmcal.tm_mday, gmcal.tm_hour, gmcal.tm_min, gmcal.tm_sec, smillis,
-			id);
-		fflush(cur_file);
-	}
+    tok = strstr(line, "id=" ACURITE_INTERNET_BRIDGE_ID);
+    if (tok != NULL) {
+        process_line0(tok);
+    } else {
+        tok = strstr(line, "humidity=");
+        if (tok != NULL) {
+            fprintf(cur_file, "&%s", tok);
+        } else {
+            tok = strstr(line, "baromin=");
+            if (tok != NULL) {
+                fprintf(cur_file, "&%s\n", tok);
+                fflush(cur_file);
+            }
+        }
+    }
 }
 
 
